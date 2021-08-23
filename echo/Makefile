@@ -1,11 +1,14 @@
+LDFLAGS=-libverbs -lrdmacm
+CFLAGS=-g -Wall
 
 all: echo-server echo-client
 
-echo-server:
-	gcc echo-server.c -g -libverbs -o echo-server 
+echo-server: echo-server.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-echo-client:
-	gcc echo-client.c -g -libverbs -o echo-client
+echo-client: echo-client.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+.PHONY: clean
 clean:
 	rm -rf *.o echo-server echo-client
