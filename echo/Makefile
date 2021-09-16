@@ -1,13 +1,13 @@
-LDFLAGS=-libverbs -lrdmacm
-CFLAGS=-g -Wall
+LDFLAGS=-libverbs -lrdmacm -lpthread
+CFLAGS=-g -Wall -std=gnu99
 
 all: echo-server echo-client
 
 echo-server: echo-server.c
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $< echo.h -o $@ $(LDFLAGS)
 
 echo-client: echo-client.c
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $< echo.h -o $@ $(LDFLAGS)
 
 .PHONY: clean
 clean:
