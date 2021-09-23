@@ -13,7 +13,7 @@
 #define TEST_NZ(x)                                                          \
     do {                                                                    \
         if ((x)) {                                                          \
-            fprintf(stderr, "error: " #x "%d %s.", errno, strerror(errno)); \
+            fprintf(stderr, "error: " #x ": %d %s.\n", errno, strerror(errno)); \
             exit(errno);                                                    \
         }                                                                   \
     } while (0)
@@ -21,7 +21,7 @@
 #define TEST_Z(x)                                                           \
     do {                                                                    \
         if (!(x)) {                                                         \
-            fprintf(stderr, "error: " #x "%d %s.", errno, strerror(errno)); \
+            fprintf(stderr, "error: " #x ": %d %s.\n", errno, strerror(errno)); \
             exit(errno);                                                    \
         }                                                                   \
     } while (0)
@@ -115,7 +115,7 @@ void initialize_peer_connection(struct rdma_cm_id* id, on_complete_t on_complete
     TEST_Z(connection->recv_mr = ibv_reg_mr(app_context->protectionDomain,
                connection->recv_buf, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE));
     TEST_Z(connection->send_mr = ibv_reg_mr(app_context->protectionDomain,
-               connection->send_mr, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ));
+               connection->send_buf, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ));
 
     // post initial receives
     struct ibv_recv_wr wr, *bad_wr = NULL;

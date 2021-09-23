@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     TEST_NZ(rdma_resolve_addr(cm_id, NULL, addr->ai_addr, timeout));
     freeaddrinfo(addr);
 
-    while (rdma_get_cm_event(channel, &event)) {
+    while (!rdma_get_cm_event(channel, &event)) {
         struct rdma_cm_event event_copy;
         memcpy(&event_copy, event, sizeof(struct rdma_cm_event));
         rdma_ack_cm_event(event);
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
             break;
         }
     }
-
+    
     rdma_destroy_event_channel(channel);
     rdma_destroy_id(cm_id);
     return 0;

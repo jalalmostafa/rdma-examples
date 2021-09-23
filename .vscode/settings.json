@@ -10,5 +10,12 @@
         "echo.h": "c",
         "stdlib.h": "c",
         "netdb.h": "c"
-    }
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/jalal/rdma-examples/echo",
+            "binaryPath": "/home/jalal/rdma-examples/echo/echo-client",
+            "binaryArgs": []
+        }
+    ]
 }
