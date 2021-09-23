@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
         memcpy(&event_copy, event, sizeof(struct rdma_cm_event));
         rdma_ack_cm_event(event);
         if (connection_event(&event_copy)) {
+            printf("Exiting...\n");
             break;
         }
     }
