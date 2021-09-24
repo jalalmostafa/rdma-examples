@@ -22,28 +22,29 @@ static void on_recv_completion(struct ibv_wc* wc)
     // receive
     connection_t* conn = (connection_t*)(uintptr_t)wc->wr_id;
     if (wc->opcode & IBV_WC_RECV) {
-        printf("Echo back: %s\n", conn->recv_buf);
-        // then echo...
+        printf("[%lu] Received: %s\n", wc->wr_id, conn->recv_buf);
+        memcpy(conn->send_buf, conn->recv_buf, BUFFER_SIZE);
+        memset(conn->recv_buf, 0, BUFFER_SIZE);
+        struct ibv_send_wr wr, *bad_wr = NULL;
+        struct ibv_sge sge = {
+            .addr = (uintptr_t)conn->send_buf,
+            .length = BUFFER_SIZE,
+            .lkey = conn->send_mr->lkey
+        };
+
+        memset(&wr, 0, sizeof(wr));
+        wr.opcode = IBV_WR_SEND;
+        wr.next = NULL;
+        wr.sg_list = &sge;
+        wr.num_sge = 1;
+        wr.send_flags = IBV_SEND_SIGNALED;
+        wr.wr_id = wc->wr_id;
+
+        TEST_NZ(ibv_post_send(conn->qp, &wr, &bad_wr));
     } else if (wc->opcode == IBV_WC_SEND) {
-        printf("Echo result: %s.\n", conn->send_buf);
+        printf("[%lu] Sent: %s.\n", wc->wr_id, conn->send_buf);
+        memset(conn->send_buf, 0, BUFFER_SIZE);
     }
-
-    struct ibv_send_wr wr, *bad_wr = NULL;
-    struct ibv_sge sge = {
-        .addr = (uintptr_t)conn->send_buf,
-        .length = BUFFER_SIZE,
-        .lkey = conn->send_mr->lkey
-    };
-
-    memset(&wr, 0, sizeof(wr));
-    wr.opcode = IBV_WR_SEND;
-    wr.next = NULL;
-    wr.sg_list = &sge;
-    wr.num_sge = 1;
-    wr.send_flags = IBV_SEND_SIGNALED;
-    wr.wr_id = wc->wr_id;
-
-    TEST_NZ(ibv_post_send(conn->qp, &wr, &bad_wr));
 }
 
 static int on_cm_connection_request(struct rdma_cm_id* id)
@@ -86,7 +87,7 @@ static int on_cm_event(struct rdma_cm_event* event)
     case RDMA_CM_EVENT_DISCONNECTED:
         return on_cm_connection_disconnect(event->id);
     default:
-        return -1;
+        return 1;
     }
 }
 
@@ -125,7 +126,7 @@ int main(int argc, char* argv[])
         rdma_ack_cm_event(cm_event);
 
         // process the connection manager event if connection established then break
-        if (on_cm_event(&cm_event_buffer) >= 0) {
+        if (on_cm_event(&cm_event_buffer)) {
             break;
         }
     }
