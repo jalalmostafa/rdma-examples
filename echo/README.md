@@ -1,4 +1,0 @@
-# RDMA Examples
-
-## Echo Example
-
