@@ -12,7 +12,7 @@ const int timeout = 500;
 static void on_complete(struct ibv_wc* wc)
 {
     if (wc->status != IBV_WC_SUCCESS) {
-        printf("Completion failed!");
+        printf("Completion failed: %d\n", wc->status);
         return;
     }
 
@@ -42,7 +42,7 @@ static int on_addr_resolved(struct rdma_cm_id* id)
 static int on_route_resolved(struct rdma_cm_id* id)
 {
     struct rdma_conn_param conn_param;
-    printf("Route to %s resolved! Connecting...", get_inet_peer_address(id));
+    printf("Route to %s resolved! Connecting...\n", get_inet_peer_address(id));
     TEST_NZ(rdma_connect(id, &conn_param));
     return 0;
 }
@@ -62,7 +62,9 @@ static int on_connection(struct rdma_cm_id* id)
 
         memset(buffer, 0, BUFFER_SIZE);
 
-        scanf(">>>%s\n", buffer);
+        printf(">>> ");
+        scanf("%s", buffer);
+        printf("\n");
 
         if (strcmp("exit", buffer) != 0) {
             memcpy(conn->send_buf, buffer, BUFFER_SIZE);
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
             break;
         }
     }
-    
+
     rdma_destroy_event_channel(channel);
     rdma_destroy_id(cm_id);
     return 0;
